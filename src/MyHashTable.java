@@ -17,6 +17,7 @@ public class MyHashTable<K, V> {
     private HashNode<K, V>[] chainArray; //or Object []
     private int M = 11; //default number of chains
     private int size;
+    private final double LOAD_FACTOR_THRESHOLD = 120;
     //constructor for creating a new hash table with DEFAULT number of chains
     public MyHashTable() {
         chainArray = new HashNode[M];
@@ -30,11 +31,11 @@ public class MyHashTable<K, V> {
     }
     //hash function to map a key to an index in the chain array
     private int hash(K key) {
-        int hash = key.hashCode() % M;
-        if (hash < 0) {
-            hash += M;
+        if (key instanceof MyTestingClass) {
+            MyTestingClass myKey = (MyTestingClass) key;
+            return Math.abs(myKey.hashCode() % M);
         }
-        return hash;
+        return Math.abs(key.hashCode() % M);
     }
     //method for putting a new key-value pair
     public void put(K key, V value) {
@@ -53,6 +54,11 @@ public class MyHashTable<K, V> {
         newNode.next = chainArray[index];
         chainArray[index] = newNode;
         size++;
+        // check if the load factor exceeds the threshold and resize if necessary
+        double loadFactor = (double) size / M;
+        if (loadFactor > LOAD_FACTOR_THRESHOLD) {
+            resize(2 * M);
+        }
     }
     //method for getting the value based on the key
     public V get(K key) {
@@ -89,6 +95,7 @@ public class MyHashTable<K, V> {
         }
         return null; //if the key wasn't found, return null
     }
+    //method to check if the given value is in the table
     public boolean contains(V value) {
         //iterate over all the chains
         for(int i=0; i<M; i++) {
@@ -105,6 +112,7 @@ public class MyHashTable<K, V> {
         //if the value was not found, return false
         return false;
     }
+    //method to get key based on value
     public K getKey(V value) {
         //iterate over all the chains
         for(int i=0; i<M; i++) {
@@ -120,6 +128,44 @@ public class MyHashTable<K, V> {
         }
         //if the value was not found, return null
         return null;
+    }
+    private void resize(int newSize) {
+        // create a new chainArray with the new size
+        HashNode<K, V>[] newChainArray = new HashNode[newSize];
+        // rehash all the elements in the old chainArray into the new chainArray
+        for (int i = 0; i < M; i++) {
+            HashNode<K, V> node = chainArray[i];
+            while (node != null) {
+                K key = node.key;
+                V value = node.value;
+                int index = hash(key) % newSize;
+                HashNode<K, V> newNode = new HashNode<>(key, value);
+                newNode.next = newChainArray[index];
+                newChainArray[index] = newNode;
+                node = node.next;
+            }
+        }
+        // update the chainArray and M
+        chainArray = newChainArray;
+        M = newSize;
+    }
+
+    public void printBucketSizes() {
+        int[] bucketSizes = new int[M];
+
+        for (int i = 0; i < M; i++) {
+            HashNode<K, V> node = chainArray[i];
+            int bucketSize = 0;
+            while (node != null) {
+                bucketSize++;
+                node = node.next;
+            }
+            bucketSizes[i] = bucketSize;
+        }
+
+        for (int i = 0; i < M; i++) {
+            System.out.println("Bucket " + i + " contains " + bucketSizes[i] + " elements");
+        }
     }
 
 }

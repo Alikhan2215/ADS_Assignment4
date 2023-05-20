@@ -168,4 +168,18 @@ public class MyHashTable<K, V> {
         }
     }
 
+    public void putAll(MyHashTable<K, V> table) {
+        size = table.size;
+        for (int i = 0; i < M; i++) {
+            HashNode<K, V> node2 = table.chainArray[i];
+            put(node2.key, node2.value);
+            HashNode<K, V> newNode = new HashNode<>(node2.key, node2.value);
+            int index = hash(node2.key);
+            newNode.next = chainArray[index];
+            chainArray[index] = newNode;
+            node2 = node2.next;
+            size++;
+        }
+    }
+
 }

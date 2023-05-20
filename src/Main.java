@@ -15,5 +15,11 @@ public class Main {
         }
 
         table.printBucketSizes();
+        System.out.println("TABLE 2");
+
+        MyHashTable<MyTestingClass, String> table2 = new MyHashTable<>();
+
+        table2.putAll(table);
+        table2.printBucketSizes();
     }
 }
